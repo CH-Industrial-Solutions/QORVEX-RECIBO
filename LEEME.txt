@@ -1,0 +1,120 @@
+QORVEX RECIBO - CH Industrial Solutions
+========================================
+
+Estructura de esta carpeta (programa)
+- QORVEX_Recibo.html      App. Ábrela con doble clic en Chrome o Edge.
+- js\                      Código de la app y librería SheetJS (sin conexión a internet).
+- assets\ch_logo.png       Logo para el login y el encabezado.
+- LEEME.txt                Este archivo.
+No guardes datos en esta carpeta. Los datos están en la carpeta compartida de SharePoint
+que eliges al abrir la app. La carpeta Datos de versiones anteriores ya no se usa.
+
+Archivos de datos (carpeta compartida de SharePoint)
+- Rampas_Bahias.xlsx          Capturista. Usuarios, turnos, metas, días laborables, festivos,
+                              parámetros, bahías, estatus, rampas, piso y facturas.
+- Cortos.xlsx                 Supervisor. Reporte de cortos activo y notas.
+- Registro_Capturista.xlsx    Movimientos del capturista (base de KPIs y entrega).
+- Registro_Supervisor.xlsx    Movimientos del supervisor: bitácora de cortos, versiones
+                              archivadas de cortos (base de gráficas) y notas.
+- Bloqueo_Rampas_Bahias.lock  Archivos de control de bloqueo. No los borres ni los edites a mano.
+- Bloqueo_Cortos.lock
+- QORVEX_Recibo.xlsx          Base de la versión anterior (una sola pieza). Si está en la carpeta,
+                              la app la separa en los cuatro archivos la primera vez.
+                              La app NO la modifica.
+
+Roles y modos
+- Cada usuario tiene un rol fijo: Administrador, Supervisor, Capturista o Consulta.
+- Al entrar eliges uno de los modos que permite tu rol:
+  - Administrador: modo administrador (configuración, piso, rampas y facturas), modo
+    supervisor (cortos y notas) o modo capturista.
+  - Supervisor: modo supervisor (cortos y notas) o modo capturista.
+  - Capturista: modo capturista (piso, rampas y facturas).
+  - Consulta: solo lectura.
+- Quien escribe toma un bloqueo. Solo una computadora escribe cada grupo de archivos a la vez:
+  - Modo capturista y modo administrador: bloqueo de Rampas y bahías
+    (escribe Rampas_Bahias.xlsx y Registro_Capturista.xlsx).
+  - Modo supervisor: bloqueo de Cortos (escribe Cortos.xlsx y Registro_Supervisor.xlsx).
+  - Modo administrador y modo capturista no pueden estar a la vez: son el mismo bloqueo.
+- Si el bloqueo lo tiene otra computadora, entras en solo lectura: la barra superior dice
+  quién lo tiene y aparece "Tomar bloqueo". Los datos de la otra computadora se actualizan
+  solos cada minuto y con "Actualizar datos".
+
+Primer uso
+1. Abre QORVEX_Recibo.html con Chrome o Edge.
+2. "Elegir carpeta de datos" -> selecciona la carpeta compartida de SharePoint.
+   La app la recuerda la próxima vez.
+3. Crea el administrador inicial (No. de empleado, nombre y contraseña).
+4. Entra con No. de empleado + contraseña y elige el modo.
+5. En Configuración (solo administrador):
+   - Turnos y horarios: inicio y fin de cada turno, y las metas por turno.
+   - Días laborables: marca en qué turnos se trabaja cada día.
+   - Festivos: fechas que no cuentan en metas ni en el métrico.
+   - Usuarios y roles, parámetros, bahías y estatus.
+
+Dos computadoras
+- Una computadora puede estar en modo supervisor (cortos) mientras la otra está en modo
+  capturista (rampas, piso, facturas). Cada una escribe solo sus archivos.
+- "Tomar bloqueo" quita el bloqueo a la otra computadora, que pasa a solo lectura sola.
+- El bloqueo se libera al cerrar sesión, después de 15 minutos sin actividad, o si la
+  computadora deja de renovarlo por 3 minutos (apagada, sin red o cerrada).
+- Por la sincronización de SharePoint/OneDrive, un cambio de bloqueo puede tardar unos
+  minutos en verse en la otra computadora.
+
+Inactividad
+- Sin clics, teclas, desplazamiento ni cambios durante 15 minutos, la sesión se bloquea y
+  libera el bloqueo. Para seguir basta con escribir tu contraseña.
+- La actualización automática no cuenta como actividad.
+
+Turno automático
+- La app detecta el turno con el reloj según los horarios configurados.
+  Un turno puede cruzar medianoche (ej. Noche 22:00-06:00).
+- En la barra superior puedes fijar un turno a mano; "Auto (reloj)" regresa al horario.
+
+Menú (cinta)
+- Inicio: cajas en piso, por estatus, por responsable (Recibo, Putaway), cajas en rampa,
+  responsable en demora y la caja más crítica. Últimas operaciones: bitácora con filtros.
+- Operación: Piso, Rampas y Facturas (capturista, supervisor y administrador);
+  Cortos y Notas (supervisor y administrador).
+  Rampas: al asignar una caja se captura proveedor, estatus (Por Descargar, Retornable,
+  Por Retirarse) y fecha y hora de llegada. Elegir "Vacía" en una rampa con caja la vacía.
+  Los estatus de rampa se editan en Configuración.
+- Análisis: KPIs. Todos ven "Mi turno hoy" y la entrega de turno. Supervisor y administrador
+  ven además el reporte diario por encargado y por turno, y el métrico mensual.
+- Sistema: Configuración (solo administrador).
+- Tema: botón "Tema blanco" / "Tema negro" en la barra superior (se recuerda en el equipo).
+
+Encargado y entrega de turno
+- Al entrar como capturista eliges el encargado del turno (supervisor o administrador activo).
+  Los registros de ese turno cuentan para ese encargado en los KPIs. Si cambia el encargado,
+  cámbialo en la barra superior.
+- Análisis > Entrega de turno: elige día y turno. Lee los registros de las dos computadoras.
+  Muestra cajas descargadas (y las camionetas), procesadas, ubicadas, recolectadas y cargadas
+  con su meta, el activo en bahías y rampas, y las cajas con más tiempo y su estatus.
+  "Actualizar datos" trae lo más reciente. "Imprimir entrega" imprime solo esa sección.
+
+Piso: cada fila es compacta. El botón "▼ Más" despliega cambiar estatus,
+  Hora resp., Ubicar y Cargar. Lo mismo aplica a las tarjetas de rampa.
+Facturas: se identifican por caja / placa. "Eliminar" no borra la fila: la marca
+  como Deleted y se puede restaurar. Las eliminadas no cuentan en los indicadores.
+
+Métricas
+- La jornada de un turno nocturno cuenta sus horas de madrugada en el día en que inició.
+- Meta del día = meta del turno si ese día es laborable para el turno y no es festivo.
+- Métrico mensual: meta = meta por turno x días laborables del turno en el mes.
+  Los festivos y los días no laborables no cuentan.
+
+Cortos
+- "Cargar cortos" la primera vez.
+- "Actualizar cortos": el reporte activo (con su estatus, folio y comentarios) pasa a
+  Registro_Supervisor.xlsx para consulta y gráficas de productividad. Cortos.xlsx queda
+  solo con el reporte nuevo. Los ítems que siguen en el reporte nuevo conservan su estatus
+  y folio.
+- "Ver versión" permite revisar versiones anteriores (solo lectura).
+- Las columnas de Item a Caja/Placas vienen del cliente. Bahía/Rampa, Estatus, Qty,
+  Folio, Comentarios y Tipo de caja son de trabajo.
+
+Reglas
+- No tengas los archivos de la carpeta abiertos en Excel mientras usas la app.
+- Las contraseñas se guardan como huella (SHA-256), no en texto.
+- Si la base es de una versión anterior, la app completa sola los horarios de turno y los
+  días laborables la primera vez que la abres. No borra nada.

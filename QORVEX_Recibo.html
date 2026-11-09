@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es" data-tema="negro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QORVEX Recibo</title>
+<script>
+  // Tema antes de pintar (evita parpadeo). Si el navegador bloquea localStorage, queda el tema negro.
+  try { var t0 = localStorage.getItem('qr-tema'); if (t0 === 'blanco' || t0 === 'negro') document.documentElement.setAttribute('data-tema', t0); } catch (e) {}
+</script>
+<style>
+  /* ---- Tema negro / azul (por defecto) ---- */
+  :root, :root[data-tema="negro"] {
+    --fondo: #070B14;
+    --panel: #0F1829;
+    --panel2: #142139;
+    --texto: #E8EEF8;
+    --gris: #9AA8BF;
+    --linea: #22314F;
+    --acento: #2F80FF;
+    --acento-txt: #FFFFFF;
+    --cinta: #0A1222;
+    --cinta-activa: #2F80FF;
+    --cinta-txt: #E8EEF8;
+    --sec: #1B2A46;
+    --sec-txt: #E8EEF8;
+    --entrada: #0B1322;
+    --err-bg: #3A1212; --err-txt: #FFB4B4;
+    --ok-bg: #12301A; --ok-txt: #B8F0C2;
+    --info-bg: #102A4C; --info-txt: #CFE3FF;
+    --resalte: #2F80FF;
+    --radio: 10px;
+  }
+  /* ---- Tema blanco / azul / amarillo ---- */
+  :root[data-tema="blanco"] {
+    --fondo: #F4F6FA;
+    --panel: #FFFFFF;
+    --panel2: #F3F7FC;
+    --texto: #001030;
+    --gris: #4F5A6B;
+    --linea: #D5DCE8;
+    --acento: #0060D0;
+    --acento-txt: #FFFFFF;
+    --cinta: #0060D0;
+    --cinta-activa: #FFD100;
+    --cinta-txt: #FFFFFF;
+    --sec: #E7ECF4;
+    --sec-txt: #001030;
+    --entrada: #FFFFFF;
+    --err-bg: #FDE8E8; --err-txt: #8A1111;
+    --ok-bg: #E8F5E1; --ok-txt: #2D5A12;
+    --info-bg: #FFF6CC; --info-txt: #001030;
+    --resalte: #FFD100;
+    --radio: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, Arial, sans-serif; color: var(--texto); background: var(--fondo); font-size: 14px; }
+  h1, h2, h3 { margin: 0 0 8px; color: var(--texto); }
+  h2 { font-size: 18px; } h3 { font-size: 15px; }
+  button, input, select, textarea { font: inherit; }
+  button { background: var(--acento); color: var(--acento-txt); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  button:hover { filter: brightness(1.08); }
+  button.sec { background: var(--sec); color: var(--sec-txt); }
+  button.peligro { background: #C00000; color: #fff; }
+  button.peq { padding: 4px 9px; font-size: 12px; }
+  input, select, textarea { border: 1px solid var(--linea); border-radius: 8px; padding: 7px 9px; background: var(--entrada); color: var(--texto); color-scheme: inherit; }
+  textarea { width: 100%; min-height: 110px; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--gris); }
+  .card { background: var(--panel); border: 1px solid var(--linea); border-radius: var(--radio); padding: 16px; margin-bottom: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .row > label { min-width: 120px; flex: 1 1 140px; }
+  .muted { color: var(--gris); font-size: 12px; }
+  .msg { padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
+  .msg.err { background: var(--err-bg); color: var(--err-txt); }
+  .msg.ok { background: var(--ok-bg); color: var(--ok-txt); }
+  .msg.info { background: var(--info-bg); color: var(--info-txt); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--linea); vertical-align: middle; }
+  th { color: var(--gris); font-weight: 600; font-size: 12px; background: var(--panel2); position: sticky; top: 0; }
+  td.num, th.num { text-align: right; }
+  .tabla-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; border: 1px solid var(--linea); border-radius: 8px; }
+  .chip { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .sem-ok { background: #70AD47; color: #fff; }
+  .sem-alerta { background: #FFD966; color: #001030; }
+  .sem-demora { background: #C00000; color: #fff; }
+  .sem-vacia { background: #BFBFBF; color: #001030; }
+  .estatus-sel { color: #001030; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .kpi { background: var(--panel); border: 1px solid var(--linea); border-radius: var(--radio); padding: 12px; border-top: 4px solid var(--resalte); }
+  .kpi b { display: block; font-size: 24px; color: var(--texto); }
+  .kpi span { color: var(--gris); font-size: 12px; }
+  .kpi.critica { border-top-color: #C00000; }
+  .grid-rampas { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; align-items: start; }
+  .rampa { background: var(--panel); border: 1px solid var(--linea); border-radius: var(--radio); padding: 10px; border-left: 6px solid #BFBFBF; }
+  .rampa.ok { border-left-color: #70AD47; } .rampa.alerta { border-left-color: #FFD966; }
+  .rampa.demora { border-left-color: #C00000; } .rampa.vacia { border-left-color: #BFBFBF; }
+  .rampa .caja { font-size: 18px; font-weight: 700; margin: 4px 0; }
+  .pila { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .pila label { gap: 2px; }
+  .pila input, .pila select { width: 100%; }
+  .pila button { width: 100%; margin-top: 2px; }
+  /* Tablas compactas: filas mas bajas; las acciones extra se despliegan con "Mas" */
+  table.compacta th, table.compacta td { padding: 3px 6px; font-size: 12px; }
+  table.compacta .chip { font-size: 11px; padding: 2px 7px; }
+  table.compacta button.peq { padding: 3px 7px; font-size: 11px; }
+  table.compacta select, table.compacta input { padding: 3px 6px; font-size: 12px; }
+  .fila-extra td { background: var(--panel2); padding: 8px 10px; }
+  .extra-acciones { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  tr.borrada { opacity: .6; }
+  tr.borrada td:first-child { text-decoration: line-through; }
+  .pantalla { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .login { width: 100%; max-width: 420px; text-align: center; }
+  .login .card { text-align: left; }
+  .login .card label { margin-bottom: 10px; }
+  .login .btns { display: flex; gap: 10px; flex-direction: column; margin-top: 8px; }
+  .marca { background: #FFFFFF; border-radius: 10px; padding: 6px 10px; display: inline-flex; align-items: center; }
+  .marca img { height: 46px; display: block; }
+  .login .marca { margin: 6px auto 14px; }
+  .login .marca img { height: 110px; }
+  header.top { background: var(--panel); border-bottom: 4px solid var(--resalte); padding: 10px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  header.top .titulo { font-weight: 700; color: var(--texto); font-size: 16px; }
+  header.top .sesion { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+  header.top .sesion label { flex-direction: row; align-items: center; gap: 6px; }
+  .turno-info { font-size: 12px; color: var(--gris); }
+  .cinta { background: var(--cinta); color: var(--cinta-txt); padding: 0 18px; }
+  .cinta-pestanas { display: flex; gap: 2px; flex-wrap: wrap; }
+  .cinta-pestanas button { background: transparent; color: var(--cinta-txt); border-radius: 0; padding: 9px 16px; font-weight: 600; opacity: .8; }
+  .cinta-pestanas button.activa { background: var(--cinta-activa); color: #001030; opacity: 1; }
+  .cinta-botones { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 0 12px; border-top: 1px solid rgba(255,255,255,.15); }
+  .boton-cinta { background: var(--sec); color: var(--sec-txt); padding: 8px 14px; }
+  .boton-cinta.activa { background: var(--cinta-activa); color: #001030; }
+  main { padding: 16px 18px 40px; max-width: 1400px; margin: 0 auto; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tres { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .dos, .tres { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { main { padding: 12px; } header.top .sesion { margin-left: 0; } .cinta { padding: 0 8px; } }
+  .bloque-sub { font-size: 12px; color: var(--gris); margin: 6px 0 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .lista-criticas { list-style: none; margin: 0; padding: 0; }
+  .lista-criticas li { padding: 8px 0; border-bottom: 1px solid var(--linea); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .lista-criticas li:first-child b.num-h { color: #C00000; }
+  .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px; }
+  .checks label { flex-direction: row; align-items: center; gap: 6px; color: var(--texto); font-size: 13px; }
+  /* Impresion: solo la entrega de turno */
+  @media print {
+    body { background: #fff !important; color: #000 !important; }
+    body * { visibility: hidden !important; }
+    #entrega, #entrega * { visibility: visible !important; }
+    #entrega { position: absolute; left: 0; top: 0; width: 100%; border: 0; border-radius: 0; background: #fff !important; color: #000 !important; padding: 0; margin: 0; }
+    #entrega .no-imp { display: none !important; }
+    #entrega h2, #entrega h3, #entrega th, #entrega td, #entrega .muted, #entrega b, #entrega span { color: #000 !important; }
+    #entrega th, #entrega td { border-color: #999 !important; }
+    #entrega .tabla-wrap { max-height: none !important; overflow: visible !important; }
+  }
+</style>
+</head>
+<body>
+<div id="raiz"><div class="pantalla"><div class="muted">Cargando QORVEX Recibo…</div></div></div>
+
+<script src="js/xlsx.full.min.js"></script>
+<script src="js/qr-core.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
